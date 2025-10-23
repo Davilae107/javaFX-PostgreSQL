@@ -2,6 +2,7 @@ package screensframework;
 
 import java.net.URL;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ResourceBundle;
@@ -107,8 +108,8 @@ public class ProductoController implements Initializable, ControlledScreen {
                     + " p.precio, "
                     + " c.nombre_categoria AS nom_categoria, "
                     + " m.nombre_marca AS nom_marca "
-                    + " FROM producto AS p, "
-                    + " categoria AS c, "
+                    + " FROM product AS p, "
+                    + " category AS c, "
                     + " marca AS m "
                     + " WHERE p.idcategoria = c.idcategoria AND "
                     + " p.idmarca = m.idmarca "
@@ -164,7 +165,7 @@ public class ProductoController implements Initializable, ControlledScreen {
             while(rs.next()){
                 //Iterate Row
                 ObservableList<String> row = FXCollections.observableArrayList();
-                for(int i = 1 ; i <= rs.getMetaData().getColumnCount()+1; i++){
+                for(int i = 1 ; i <= rs.getMetaData().getColumnCount(); i++){
                     //Iterate Column
                     row.add(rs.getString(i));
                 }
@@ -185,7 +186,7 @@ public class ProductoController implements Initializable, ControlledScreen {
             
             conexion = DBConnection.connect();
             String sql = "SELECT p.*, c.*, m.* "
-                    + " FROM producto AS p, categoria AS c, marca AS m "
+                    + " FROM product AS p, category AS c, marca AS m "
                     + " WHERE idproducto = "+valor+" AND "
                     + " p.idcategoria = c.idcategoria AND "
                     + " p.idmarca = m.idmarca";
@@ -270,7 +271,7 @@ public class ProductoController implements Initializable, ControlledScreen {
                     + " VALUES (?, ?, ?, ?)";
             PreparedStatement estado = conexion.prepareStatement(sql);
             estado.setString(1, tfNombreProducto.getText());
-            estado.setInt(2, Integer.parseInt(tfPrecioProducto.getText()));
+            estado.setDouble(2, Double.parseDouble(tfPrecioProducto.getText()));
             estado.setInt(3, indiceCategoria);
             estado.setInt(4, indiceMarca);
             
@@ -278,9 +279,17 @@ public class ProductoController implements Initializable, ControlledScreen {
             
             if (n > 0) {
                 
+                // Limpiar campos después de agregar
+                tfNombreProducto.setText("");
+                tfPrecioProducto.setText("");
+                cbCategoriaProducto.setValue(null);
+                cbMarcaProducto.setValue(null);
+                
                 tablaProducto.getColumns().clear();
                 tablaProducto.getItems().clear();
                 cargarDatosTabla();
+                
+                JOptionPane.showMessageDialog(null, "Producto agregado exitosamente");
             }
             estado.close();
             
@@ -299,7 +308,7 @@ public class ProductoController implements Initializable, ControlledScreen {
         try {
             conexion = DBConnection.connect();
             
-            String sql = "UPDATE producto "
+            String sql = "UPDATE product "
                     + " SET nombre_producto = ?, "
                     + " precio = ?, "
                     + " idcategoria = ?, "
@@ -309,16 +318,33 @@ public class ProductoController implements Initializable, ControlledScreen {
             PreparedStatement estado = conexion.prepareStatement(sql);
             
             estado.setString(1, tfNombreProducto.getText());
-            estado.setInt(2, Integer.parseInt(tfPrecioProducto.getText()));
+            estado.setDouble(2, Double.parseDouble(tfPrecioProducto.getText()));
             estado.setInt(3, indiceCategoria);
             estado.setInt(4, indiceMarca);
             
             int n = estado.executeUpdate();
             
             if (n > 0) {
+                
+                // Limpiar campos y restablecer botones
+                lbCodigoProducto.setText("");
+                tfNombreProducto.setText("");
+                tfPrecioProducto.setText("");
+                cbCategoriaProducto.setValue(null);
+                cbMarcaProducto.setValue(null);
+                
+                btAddProducto.setDisable(false);
+                btEliminarProducto.setDisable(true);
+                btModificarProducto.setDisable(true);
+                btAddProducto.setStyle("-fx-background-color:#66CCCC");
+                btEliminarProducto.setStyle("-fx-background-color:grey");
+                btModificarProducto.setStyle("-fx-background-color:grey");
+                
                 tablaProducto.getColumns().clear();
                 tablaProducto.getItems().clear();
                 cargarDatosTabla();
+                
+                JOptionPane.showMessageDialog(null, "Producto modificado exitosamente");
             }
             
             estado.close();
@@ -336,16 +362,33 @@ public class ProductoController implements Initializable, ControlledScreen {
             try {
                 conexion = DBConnection.connect();
 
-                String sql = "DELETE FROM producto WHERE idproducto = "+lbCodigoProducto.getText()+"";
+                String sql = "DELETE FROM product WHERE idproducto = "+lbCodigoProducto.getText()+"";
 
                 PreparedStatement estado = conexion.prepareStatement(sql);
 
-                estado.executeUpdate();
+                int n = estado.executeUpdate();
 
                 if (n > 0) {
+                    
+                    // Limpiar campos y restablecer botones
+                    lbCodigoProducto.setText("");
+                    tfNombreProducto.setText("");
+                    tfPrecioProducto.setText("");
+                    cbCategoriaProducto.setValue(null);
+                    cbMarcaProducto.setValue(null);
+                    
+                    btAddProducto.setDisable(false);
+                    btEliminarProducto.setDisable(true);
+                    btModificarProducto.setDisable(true);
+                    btAddProducto.setStyle("-fx-background-color:#66CCCC");
+                    btEliminarProducto.setStyle("-fx-background-color:grey");
+                    btModificarProducto.setStyle("-fx-background-color:grey");
+                    
                     tablaProducto.getColumns().clear();
                     tablaProducto.getItems().clear();
                     cargarDatosTabla();
+                    
+                    JOptionPane.showMessageDialog(null, "Producto eliminado exitosamente");
                 }
 
                 estado.close();
@@ -360,6 +403,8 @@ public class ProductoController implements Initializable, ControlledScreen {
     private void buscarProducto(ActionEvent event) {
         
         tablaProducto.getItems().clear();
+        producto.clear(); 
+        
         try {
             conexion = DBConnection.connect();
              String sql = "SELECT p.idproducto, "
@@ -367,7 +412,7 @@ public class ProductoController implements Initializable, ControlledScreen {
                     + " p.precio, "
                     + " c.nombre_categoria AS nom_categoria, "
                     + " m.nombre_marca AS nom_marca "
-                    + " FROM producto AS p, categoria AS c, marca AS m "
+                    + " FROM product AS p, category AS c, marca AS m "
                     + " WHERE CONCAT "
                     + " (p.idproducto, '', "
                     + " p.nombre_producto, '', "
@@ -400,6 +445,14 @@ public class ProductoController implements Initializable, ControlledScreen {
     @FXML
     private void nuevoProducto(ActionEvent event) {
         
+        // Limpiar los campos
+        lbCodigoProducto.setText("");
+        tfNombreProducto.setText("");
+        tfPrecioProducto.setText("");
+        cbCategoriaProducto.setValue(null);
+        cbMarcaProducto.setValue(null);
+        
+        // Habilitar botón agregar y deshabilitar modificar/eliminar
         btAddProducto.setDisable(false);
         btEliminarProducto.setDisable(true);
         btModificarProducto.setDisable(true);
