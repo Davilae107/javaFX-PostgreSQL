@@ -108,7 +108,7 @@ public class ProductoController implements Initializable, ControlledScreen {
                     + " p.precio, "
                     + " c.nombre_categoria AS nom_categoria, "
                     + " m.nombre_marca AS nom_marca "
-                    + " FROM product AS p, "
+                    + " FROM producto AS p, "
                     + " category AS c, "
                     + " marca AS m "
                     + " WHERE p.idcategoria = c.idcategoria AND "
@@ -186,7 +186,7 @@ public class ProductoController implements Initializable, ControlledScreen {
             
             conexion = DBConnection.connect();
             String sql = "SELECT p.*, c.*, m.* "
-                    + " FROM product AS p, category AS c, marca AS m "
+                    + " FROM producto AS p, category AS c, marca AS m "
                     + " WHERE idproducto = "+valor+" AND "
                     + " p.idcategoria = c.idcategoria AND "
                     + " p.idmarca = m.idmarca";
@@ -266,7 +266,7 @@ public class ProductoController implements Initializable, ControlledScreen {
         
         try {
             conexion = DBConnection.connect();
-            String sql = "INSERT INTO product "
+            String sql = "INSERT INTO producto "
                     + " (nombre_producto, precio, idcategoria, idmarca) "
                     + " VALUES (?, ?, ?, ?)";
             PreparedStatement estado = conexion.prepareStatement(sql);
@@ -308,7 +308,7 @@ public class ProductoController implements Initializable, ControlledScreen {
         try {
             conexion = DBConnection.connect();
             
-            String sql = "UPDATE product "
+            String sql = "UPDATE producto "
                     + " SET nombre_producto = ?, "
                     + " precio = ?, "
                     + " idcategoria = ?, "
@@ -362,7 +362,7 @@ public class ProductoController implements Initializable, ControlledScreen {
             try {
                 conexion = DBConnection.connect();
 
-                String sql = "DELETE FROM product WHERE idproducto = "+lbCodigoProducto.getText()+"";
+                String sql = "DELETE FROM producto WHERE idproducto = "+lbCodigoProducto.getText()+"";
 
                 PreparedStatement estado = conexion.prepareStatement(sql);
 
@@ -412,7 +412,7 @@ public class ProductoController implements Initializable, ControlledScreen {
                     + " p.precio, "
                     + " c.nombre_categoria AS nom_categoria, "
                     + " m.nombre_marca AS nom_marca "
-                    + " FROM product AS p, category AS c, marca AS m "
+                    + " FROM producto AS p, category AS c, marca AS m "
                     + " WHERE CONCAT "
                     + " (p.idproducto, '', "
                     + " p.nombre_producto, '', "
